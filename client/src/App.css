@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Roboto+Mono:wght@700&family=Roboto:wght@400;700&display=swap');
+
+html, body, #root, .clock {
+    height: 100%;
+    font-family: Roboto;
+    font-weight: 400;
+}
+
+#root {
+    display: grid;
+    justify-content: center;
+}
+
+.clock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.clock .time {
+    font-family: Roboto Mono;
+    font-size: 250px;
+    font-weight: 700;
+}
+.clock .time.running {
+    font-size: 350px;
+}
+.clock .date {
+    display: block;
+    text-align: center;
+    font-family: Quicksand;
+    font-weight: 400;
+    font-size: 20px;
+    color: #DDDDDD;
+}
+
+.event {
+    width: 1200px;
+    padding-top: 100px;
+}
+.event header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 20px;
+}
+.event header h1 {
+    font-size: 50px;
+}
+
+.table {
+    display: flex;
+    justify-content: center;
+}
+.table table {
+    width: 100%;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.table table th, .table table tr:nth-child(even) td {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+.table table th, .table table td {
+    padding: 10px;
+    text-align: left;
+}
+.table table th:first-child, .table table td:first-child {
+    padding-left: 20px;
+}
+.table table th:last-child, .table table td:last-child {
+    padding-right: 20px;
+}
+
