@@ -8,7 +8,7 @@ function Clock({runningTime}) {
                     <span className={"time running"}>
                         {runningTime}
                     </span>
-                ) : (<TimeOfDay />)
+                ) : <TimeOfDay />
                 }
             </div>
         </>

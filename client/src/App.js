@@ -46,9 +46,9 @@ function App() {
 
     return (
         <>
-            {(data == null || (data.started && !data.allAthletesHavePosition)) && <Clock runningTime={data != null && data.runningTime} />} 
-                
-            {data && <Event eventInfo={data.eventInfo} athletes={data.athletes} />}
+            {(data == null || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition)) && <Clock runningTime={data && Object.keys(data.eventInfo).length > 0 && data.runningTime} />}
+
+            {data && Object.keys(data.eventInfo).length > 0 && <Event eventInfo={data.eventInfo} athletes={data.athletes} />}
         </>
     );
 }

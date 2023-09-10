@@ -5,8 +5,8 @@ const websocket = require('./websocket');
 const lynxPort = 43278;
 var tempResults = '';
 var finalResults = '';
-var runningTime = '0.0';
-var scoreboardData = {eventInfo: {}, athletes: [], runningTime: runningTime, started: false, allAthletesHavePosition: false};
+var initialRunningTime = '0.0';
+var scoreboardData = {eventInfo: {}, athletes: [], runningTime: initialRunningTime, started: false, allAthletesHavePosition: false};
 
 udpResultsServer.on("listening", function () {
     var address = udpResultsServer.address();
@@ -26,7 +26,8 @@ udpResultsServer.on("message", function (msg, rinfo) {
         
         var resultsDump = finalResults.split(';');
 
-        scoreboardData.athletes = [];
+        var oldAthletes = scoreboardData.athletes
+        scoreboardData.athletes = []
         for (var i = 0; i < resultsDump.length; i++) {
             resultsDump[i] = resultsDump[i].split(',');
             var type = resultsDump[i][0];
@@ -37,7 +38,16 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "StartListHeader":
+                    scoreboardData.runningTime = initialRunningTime
+                    scoreboardData.eventInfo = {
+                        title: resultsDump[i][1],
+                        wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
+                        amountAthletes: resultsDump[i][3]
+                    };
+
+                    break;
                 case "ResultsHeader":
+                    console.log("bb")
                     scoreboardData.eventInfo = {
                         title: resultsDump[i][1],
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
@@ -46,7 +56,20 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "StartList":
+                    if(scoreboardData.athletes.length < scoreboardData.eventInfo.amountAthletes) {
+                        scoreboardData.athletes.push({
+                            place: resultsDump[i][1],
+                            lane: resultsDump[i][2],
+                            id: resultsDump[i][3],
+                            name: resultsDump[i][4],
+                            affiliation: resultsDump[i][5],
+                            time: resultsDump[i][6]
+                        });
+                    }
+
+                    break;
                 case "Result":
+                    console.log("dd")
                     if(scoreboardData.athletes.length < scoreboardData.eventInfo.amountAthletes) {
                         scoreboardData.athletes.push({
                             place: resultsDump[i][1],
@@ -77,9 +100,12 @@ udpResultsServer.on("message", function (msg, rinfo) {
                     break;
             }
 
-            if(scoreboardData.runningTime !== "0.0") {
+            if(scoreboardData.runningTime.replace(/ /g, "") != initialRunningTime) {
                 scoreboardData.started = true;
             }
+        }
+        if(scoreboardData.athletes.length === 0) {
+            scoreboardData.athletes = oldAthletes
         }
         tempResults = '';// reset tempResults variable to prepare for next datagram
 
