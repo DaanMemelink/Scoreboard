@@ -18,7 +18,7 @@ code {
 }
 
 body {
-    max-width: calc(100% - 2 * 200px);
+    /* max-width: calc(100% - 2 * 200px); */
     margin: auto;
 
     background-image: url("./../public/img/background.png");

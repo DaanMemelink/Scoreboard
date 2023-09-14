@@ -22,14 +22,14 @@ function TimeOfDay() {
     return (
         <>
             <div>
-                <span className={"time"}>
+                <span className="time">
                     {hours}
                     :
                     {minutes}
                     :
                     {seconds}
                 </span>
-                <span className={"date"}>{date}</span>
+                <span className="date">{date}</span>
             </div>
         </>
     );

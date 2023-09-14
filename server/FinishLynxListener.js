@@ -5,12 +5,26 @@ const websocket = require('./websocket');
 const lynxPort = 43278;
 var tempResults = '';
 var finalResults = '';
-var initialRunningTime = '0.0';
-var scoreboardData = {eventInfo: {}, athletes: [], runningTime: initialRunningTime, started: false, allAthletesHavePosition: false};
+const initialRunningTime = '0.0';
+var scoreboardData = {}
+resetScoreboard()
+
+function resetScoreboard() {
+    scoreboardData = {
+        eventInfo: {},
+        athletes: [],
+        runningTime: initialRunningTime,
+        unOfficialFinishTime: null,
+        officialFinishTime: null,
+        started: false,
+        allAthletesHavePosition: false,
+        forceShowTimeOfDay: false
+    };
+}
 
 udpResultsServer.on("listening", function () {
     var address = udpResultsServer.address();
-    console.log("UDP server listening on port: " + address.port);
+    console.log("UDP server listening on port " + address.port);
 });
 udpResultsServer.bind(lynxPort);
 
@@ -33,12 +47,24 @@ udpResultsServer.on("message", function (msg, rinfo) {
             var type = resultsDump[i][0];
 
             switch(type) {
+                case "TimeOfDay":
+                    scoreboardData.forceShowTimeOfDay = true
+
+                    break;
                 case "Time":
                     scoreboardData.runningTime = resultsDump[i][1];    
 
+                    if(parseFloat(resultsDump[i][1]) > 5) {
+                        scoreboardData.unOfficialFinishTime = "5.20"
+                    }
+
+                    break;
+                case "TimeStopped":
+                    scoreboardData.unOfficialFinishTime = resultsDump[i][1];    
+
                     break;
                 case "StartListHeader":
-                    scoreboardData.runningTime = initialRunningTime
+                    resetScoreboard()
                     scoreboardData.eventInfo = {
                         title: resultsDump[i][1],
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
@@ -47,7 +73,6 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "ResultsHeader":
-                    console.log("bb")
                     scoreboardData.eventInfo = {
                         title: resultsDump[i][1],
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
@@ -69,7 +94,6 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "Result":
-                    console.log("dd")
                     if(scoreboardData.athletes.length < scoreboardData.eventInfo.amountAthletes) {
                         scoreboardData.athletes.push({
                             place: resultsDump[i][1],
@@ -87,15 +111,19 @@ udpResultsServer.on("message", function (msg, rinfo) {
             switch(type) {
                 case "Result":
                     var allAthletesHavePosition = true;
-                    for(var j = 0; j < scoreboardData.athletes.length; j++) {
-                        if(!scoreboardData.athletes[j].place) {
+                    var fastestTime = null
+                    for(var i = 0; i < scoreboardData.athletes.length; i++) {
+                        if(scoreboardData.athletes[i].place) {
+                            if(fastestTime === null || parseFloat(scoreboardData.athletes[i].time) < parseFloat(fastestTime)) {
+                                fastestTime = scoreboardData.athletes[i].time
+                            }
+                        } else {
                             allAthletesHavePosition = false;
-
-                            break;
                         }
                     }
 
                     scoreboardData.allAthletesHavePosition = allAthletesHavePosition;
+                    scoreboardData.officialFinishTime = fastestTime
 
                     break;
             }

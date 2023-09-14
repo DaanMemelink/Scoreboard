@@ -44,11 +44,23 @@ function App() {
         }
     }, [lastJsonMessage, readyState]);
 
+
+    const [a, setA] = useState(null)
+
     return (
         <>
-            {(data == null || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition)) && <Clock runningTime={data && Object.keys(data.eventInfo).length > 0 && data.runningTime} />}
+        <button onClick={() => setA("1:13.49")}>Send</button>
+            <Clock runningTime="2:15.29" finishTime={a} />
 
-            {data && Object.keys(data.eventInfo).length > 0 && <Event eventInfo={data.eventInfo} athletes={data.athletes} />}
+            <Event eventInfo={{}} athletes={[]} />
+        </>
+    )
+
+    return (
+        <>
+            {(data == null || data.forceShowTimeOfDay || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition)) && <Clock runningTime={data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && data.runningTime} finishTime={data && (data.officialFinishTime ? data.officialFinishTime : data.unOfficialFinishTime)} />}
+
+            {data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && <Event eventInfo={data.eventInfo} athletes={data.athletes} />}
         </>
     );
 }
