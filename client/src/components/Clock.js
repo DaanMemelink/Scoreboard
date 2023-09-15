@@ -1,17 +1,22 @@
+import { AutoTextSize } from 'auto-text-size'
 import TimeOfDay from "./TimeOfDay";
 
-function Clock({runningTime, finishTime}) {
+function Clock({className, runningTime, finishTime}) {
     return (
         <>
-            <div className={`clock ${runningTime ? "" : "timeofday"} `}>
+            <div className={`clock ${runningTime ? "" : "timeofday"} ${className}`}>
                 {runningTime ? (
                     <div className="times-container">
-                        <span className="time primary">
-                            {finishTime ? finishTime : runningTime}
-                        </span>
-                        <span className={`time secondary ${finishTime ? "shown" : ""}`}>
-                            {runningTime}
-                        </span>
+                        <div className="time primary">
+                            <AutoTextSize minFontSizePx={100} maxFontSizePx={300}>
+                                {finishTime ? finishTime : runningTime}
+                            </AutoTextSize>
+                        </div>
+                        <div className={`time secondary ${finishTime ? "shown" : ""}`}>
+                            <AutoTextSize minFontSizePx={100} maxFontSizePx={200}>
+                                {finishTime ? runningTime : ""}
+                            </AutoTextSize>
+                        </div>
                     </div>
                 ) : <TimeOfDay />
                 }

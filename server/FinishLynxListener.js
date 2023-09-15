@@ -1,6 +1,7 @@
 const dgram = require('dgram');
 const udpResultsServer = dgram.createSocket('udp4');
 const websocket = require('./websocket');
+const iconv = require('iconv-lite')
 
 const lynxPort = 43278;
 var tempResults = '';
@@ -29,14 +30,10 @@ udpResultsServer.on("listening", function () {
 udpResultsServer.bind(lynxPort);
 
 udpResultsServer.on("message", function (msg, rinfo) {
-    // console.log(new Buffer.from(msg).toString());
-    // console.log(msg.decode("utf-8"));
-    // console.log(msg.toString());
-
     if(rinfo.size == 536){
-        tempResults = tempResults + msg.toString();
+        tempResults = tempResults + iconv.decode(msg, 'cp1252');
     } else {// datagram is not full, so this is the end of the message
-        finalResults = tempResults + msg.toString();
+        finalResults = tempResults + iconv.decode(msg, 'cp1252');
         
         var resultsDump = finalResults.split(';');
 
@@ -54,9 +51,9 @@ udpResultsServer.on("message", function (msg, rinfo) {
                 case "Time":
                     scoreboardData.runningTime = resultsDump[i][1];    
 
-                    if(parseFloat(resultsDump[i][1]) > 5) {
-                        scoreboardData.unOfficialFinishTime = "5.20"
-                    }
+                    // if(parseFloat(resultsDump[i][1]) > 5) {
+                    //     scoreboardData.unOfficialFinishTime = "5.20"
+                    // }
 
                     break;
                 case "TimeStopped":
@@ -106,6 +103,11 @@ udpResultsServer.on("message", function (msg, rinfo) {
                     }
 
                     break;
+                default:
+                    if(type != "") {
+                        console.log(type, resultsDump[i][1])
+
+                    }
             }
 
             switch(type) {

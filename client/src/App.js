@@ -45,20 +45,22 @@ function App() {
     }, [lastJsonMessage, readyState]);
 
 
-    const [a, setA] = useState(null)
+    //const [a, setA] = useState(null)
+    //
+    // return (
+    //     <>
+    //     <button onClick={() => setA("1:13.49")}>Send</button>
+    //         <Clock runningTime="2:15.29" finishTime={a} />
+
+    //         <Event eventInfo={{}} athletes={[]} />
+    //     </>
+    // )
+
+    const showClock = (data == null || data.forceShowTimeOfDay || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition))
 
     return (
         <>
-        <button onClick={() => setA("1:13.49")}>Send</button>
-            <Clock runningTime="2:15.29" finishTime={a} />
-
-            <Event eventInfo={{}} athletes={[]} />
-        </>
-    )
-
-    return (
-        <>
-            {(data == null || data.forceShowTimeOfDay || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition)) && <Clock runningTime={data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && data.runningTime} finishTime={data && (data.officialFinishTime ? data.officialFinishTime : data.unOfficialFinishTime)} />}
+            <Clock className={showClock ? "shown" : ""} runningTime={data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && data.runningTime} finishTime={data && (data.officialFinishTime ? data.officialFinishTime : data.unOfficialFinishTime)} />
 
             {data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && <Event eventInfo={data.eventInfo} athletes={data.athletes} />}
         </>
