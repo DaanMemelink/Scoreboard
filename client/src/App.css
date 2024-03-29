@@ -44,6 +44,9 @@ html, body, #root {
 .clock .time.primary {
     width: 60%;
 }
+.clock .time.primary.full-width {
+    width: 100%;
+}
 .clock .time.secondary {
     max-width: 0%;
     width: 40%;
