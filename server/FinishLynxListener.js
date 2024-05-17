@@ -4,10 +4,10 @@ const websocket = require('./websocket');
 const iconv = require('iconv-lite')
 
 const lynxPort = 43278;
-var tempResults = '';
-var finalResults = '';
+let tempResults = '';
+let finalResults = '';
 const initialRunningTime = '0.0';
-var scoreboardData = {}
+let scoreboardData = {};
 resetScoreboard()
 
 function resetScoreboard() {
@@ -24,24 +24,33 @@ function resetScoreboard() {
 }
 
 udpResultsServer.on("listening", function () {
-    var address = udpResultsServer.address();
+    const address = udpResultsServer.address();
     console.log("UDP server listening on port " + address.port);
 });
 udpResultsServer.bind(lynxPort);
 
+function getTitle(fullTitle) {
+    console.log(fullTitle)
+
+    let title = fullTitle
+
+    return title
+}
+
 udpResultsServer.on("message", function (msg, rinfo) {
-    if(rinfo.size == 536){
+    if(rinfo.size === 536){
         tempResults = tempResults + iconv.decode(msg, 'cp1252');
     } else {// datagram is not full, so this is the end of the message
         finalResults = tempResults + iconv.decode(msg, 'cp1252');
-        
-        var resultsDump = finalResults.split(';');
 
-        var oldAthletes = scoreboardData.athletes
+        const resultsDump = finalResults.split(';');
+
+        const oldAthletes = scoreboardData.athletes;
         scoreboardData.athletes = []
-        for (var i = 0; i < resultsDump.length; i++) {
+        scoreboardData.action = null
+        for (let i = 0; i < resultsDump.length; i++) {
             resultsDump[i] = resultsDump[i].split(',');
-            var type = resultsDump[i][0];
+            const type = resultsDump[i][0];
 
             switch(type) {
                 case "TimeOfDay":
@@ -49,19 +58,23 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "Time":
-                    scoreboardData.runningTime = resultsDump[i][1];    
+                    scoreboardData.runningTime = resultsDump[i][1];
+                    scoreboardData.action = "time"
 
-                    // if(parseFloat(resultsDump[i][1]) > 5) {
-                    //     scoreboardData.unOfficialFinishTime = "5.20"
-                    // }
+                    break;
+                case "TimeGun":
+                    console.log("TimeGun", resultsDump[i][1])
+                    scoreboardData.runningTime = resultsDump[i][1];
+                    scoreboardData.action = "timeGun"
 
                     break;
                 case "TimeStopped":
-                    scoreboardData.unOfficialFinishTime = resultsDump[i][1];    
+                    scoreboardData.unOfficialFinishTime = resultsDump[i][1];
 
                     break;
                 case "StartListHeader":
                     resetScoreboard()
+                    getTitle(resultsDump[i][1])
                     scoreboardData.eventInfo = {
                         title: resultsDump[i][1],
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
@@ -70,11 +83,14 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "ResultsHeader":
+                    getTitle(resultsDump[i][1])
+
                     scoreboardData.eventInfo = {
                         title: resultsDump[i][1],
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
                         amountAthletes: resultsDump[i][3]
                     };
+                    scoreboardData.action = "resultsHeader"
 
                     break;
                 case "StartList":
@@ -104,9 +120,8 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 default:
-                    if(type != "") {
+                    if(type !== "") {
                         console.log(type, resultsDump[i][1])
-
                     }
             }
 
@@ -114,7 +129,7 @@ udpResultsServer.on("message", function (msg, rinfo) {
                 case "Result":
                     var allAthletesHavePosition = true;
                     var fastestTime = null
-                    for(var i = 0; i < scoreboardData.athletes.length; i++) {
+                    for(i = 0; i < scoreboardData.athletes.length; i++) {
                         if(scoreboardData.athletes[i].place) {
                             if(fastestTime === null || parseFloat(scoreboardData.athletes[i].time) < parseFloat(fastestTime)) {
                                 fastestTime = scoreboardData.athletes[i].time
@@ -130,7 +145,7 @@ udpResultsServer.on("message", function (msg, rinfo) {
                     break;
             }
 
-            if(scoreboardData.runningTime.replace(/ /g, "") != initialRunningTime) {
+            if(scoreboardData.runningTime.replace(/ /g, "") !== initialRunningTime) {
                 scoreboardData.started = true;
             }
         }

@@ -7,14 +7,19 @@ function Clock({className, runningTime, finishTime}) {
             <div className={`clock ${runningTime ? "" : "timeofday"} ${className}`}>
                 {runningTime ? (
                     <div className="times-container">
-                        <div className={`time primary ${!finishTime ? "full-width" : ""}`}>
+                        {/*<div className={`time primary ${!finishTime ? "full-width" : ""}`}>*/}
+                        {/*    <AutoTextSize minFontSizePx={100} maxFontSizePx={300}>*/}
+                        {/*        {finishTime ? parseFloat(finishTime).toFixed(2) : runningTime}*/}
+                        {/*    </AutoTextSize>*/}
+                        {/*</div>*/}
+                        {/*<div className={`time secondary ${finishTime ? "shown" : ""}`}>*/}
+                        {/*    <AutoTextSize minFontSizePx={100} maxFontSizePx={200}>*/}
+                        {/*        {finishTime ? runningTime : ""}*/}
+                        {/*    </AutoTextSize>*/}
+                        {/*</div>*/}
+                        <div className={`time primary full-width`}>
                             <AutoTextSize minFontSizePx={100} maxFontSizePx={300}>
-                                {finishTime ? finishTime : runningTime}
-                            </AutoTextSize>
-                        </div>
-                        <div className={`time secondary ${finishTime ? "shown" : ""}`}>
-                            <AutoTextSize minFontSizePx={100} maxFontSizePx={200}>
-                                {finishTime ? runningTime : ""}
+                                {runningTime}
                             </AutoTextSize>
                         </div>
                     </div>
