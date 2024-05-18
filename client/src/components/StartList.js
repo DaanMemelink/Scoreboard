@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 function StartList({officialTimeIsSet, athletes}) {
     const tableRef = useRef();
@@ -18,7 +18,7 @@ function StartList({officialTimeIsSet, athletes}) {
     }, [])
 
     //Make table scroll if it's too high or if cell is too wide
-    useEffect(() => {
+    useLayoutEffect(() => {
         let intervalIds = []
 
         document.fonts.ready.then(() => {
@@ -49,7 +49,7 @@ function StartList({officialTimeIsSet, athletes}) {
                     }
                 })
 
-                if(tableRef.current.scrollHeight > tableRef.current.clientHeight) {
+                if (tableRef.current.scrollHeight > tableRef.current.clientHeight) {
                     const diff = tableRef.current.scrollHeight - tableRef.current.clientHeight
 
                     let scrollPosition = 0
@@ -73,7 +73,7 @@ function StartList({officialTimeIsSet, athletes}) {
         return () => {
             intervalIds.forEach(id => clearInterval(id));
         }
-    }, [athletes, windowSize])
+    }, [athletes, windowSize, tableRef])
 
     return (
         <>

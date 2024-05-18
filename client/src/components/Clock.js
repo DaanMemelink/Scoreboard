@@ -1,29 +1,26 @@
 import { AutoTextSize } from 'auto-text-size'
 import TimeOfDay from "./TimeOfDay";
 
-function Clock({className, runningTime, finishTime}) {
+function Clock({runningTime, finishTime}) {
     return (
         <>
-            <div className={`clock ${runningTime ? "" : "timeofday"} ${className}`}>
-                {runningTime ? (
-                    <div className="times-container">
-                        {/*<div className={`time primary ${!finishTime ? "full-width" : ""}`}>*/}
-                        {/*    <AutoTextSize minFontSizePx={100} maxFontSizePx={300}>*/}
-                        {/*        {finishTime ? parseFloat(finishTime).toFixed(2) : runningTime}*/}
-                        {/*    </AutoTextSize>*/}
-                        {/*</div>*/}
-                        {/*<div className={`time secondary ${finishTime ? "shown" : ""}`}>*/}
-                        {/*    <AutoTextSize minFontSizePx={100} maxFontSizePx={200}>*/}
-                        {/*        {finishTime ? runningTime : ""}*/}
-                        {/*    </AutoTextSize>*/}
-                        {/*</div>*/}
-                        <div className={`time primary full-width`}>
-                            <AutoTextSize minFontSizePx={100} maxFontSizePx={300}>
+            <div className={`clock ${!runningTime && "timeofday"}`}>
+                {runningTime ?
+                    <>
+                        <div className={`time finish ${!finishTime && "hidden"}`}>
+                            <AutoTextSize minFontSizePx={100} maxFontSizePx={200} mode="oneline">
+                                {finishTime && parseFloat(finishTime).toFixed(2)}
+                            </AutoTextSize>
+                        </div>
+
+                        <div className={`time running`}>
+                            <AutoTextSize minFontSizePx={finishTime ? 50 : 100} maxFontSizePx={finishTime ? 150 : 200} mode="oneline">
                                 {runningTime}
                             </AutoTextSize>
                         </div>
-                    </div>
-                ) : <TimeOfDay />
+                    </>
+                :
+                    <TimeOfDay />
                 }
             </div>
         </>

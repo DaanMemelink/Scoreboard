@@ -46,16 +46,14 @@ function TimeOfDay() {
 
     return (
         <>
-            <div>
-                <span className="time">
-                    {hours}
-                    :
-                    {minutes}
-                    :
-                    {seconds}
-                </span>
-                <span className="date">{date}</span>
-            </div>
+            <span className="time">
+                {hours}
+                :
+                {minutes}
+                :
+                {seconds}
+            </span>
+            <span className="date">{date}</span>
         </>
     );
 }

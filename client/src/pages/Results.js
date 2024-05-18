@@ -1,6 +1,8 @@
 import {useEffect, useMemo, useState} from "react";
+import Box from "../components/Box";
+import Clock from "../components/Clock";
 
-function Results({data}) {
+function Results({data, runningTime}) {
     const [athleteIndex, setAthleteIndex] = useState(0);
 
     useEffect(() => {
@@ -15,7 +17,7 @@ function Results({data}) {
                     }
                 })
             }
-        }, 2000)
+        }, 3000)
 
         return () => clearInterval(timer)
     }, [data.athletes])
@@ -23,25 +25,44 @@ function Results({data}) {
     const currentAthlete = useMemo(() => data.athletes[athleteIndex], [athleteIndex])
 
     return (
-        <>
-            {data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 &&
-                <div className="result-page">
-                    <div className="result-athlete">
+        <div className="box-container">
+            {data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 ?
+                <>
+                    <Box>
+                        <div className="result">
+                            <div className="place-and-name">
+                                <h1>{currentAthlete.place}</h1>
+                                <h1>{currentAthlete.name}</h1>
+                            </div>
+                            <h1 className="time">{currentAthlete.time}</h1>
+                        </div>
+                    </Box>
+
+                    <div className="bottom">
                         <div>
-                            <span className="result-place">{currentAthlete.place}</span>
-                            <span className="result-name">{currentAthlete.name}</span>
+                            {data.eventInfo.wind &&
+                                <Box showSticker={false} isSmall={true}>
+                                    <span className="label">Wind</span>
+                                    <h2 className="data">{data.eventInfo.wind}</h2>
+                                </Box>
+                            }
                         </div>
-                        <span className="result-time">{currentAthlete.time}</span>
+
+                        {!data.allAthletesHavePosition &&
+                            <h1 className="running-time">{runningTime}</h1>
+                        }
                     </div>
-                    <div className="result-bottom">
-                        <div className="wind">
-                            <span>{data.eventInfo.wind}</span>
-                        </div>
-                    </div>
-                </div>
+                </>
+                :
+                <Box>
+                    <Clock
+                           runningTime={data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && data.runningTime}
+                           finishTime={data && (data.officialFinishTime ? data.officialFinishTime : data.unOfficialFinishTime)}
+                    />
+                </Box>
             }
-        </>
-    );
+        </div>
+    )
 }
 
 export default Results

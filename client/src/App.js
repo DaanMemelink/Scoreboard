@@ -16,7 +16,7 @@ function App() {
         eventInfo: {
             name: '100m U16 jongens',
             date: '2021-01-01',
-            time: '12:00',
+            time: '11:00',
             location: 'Location',
             distance: '100m',
             wind: '+0.7 m/s'
@@ -29,12 +29,14 @@ function App() {
         ],
         forceShowTimeOfDay: false,
         started: true,
-        runningTime: '13,40'
+        runningTime: '13.40',
+        unOfficialFinishTime: '14.40',
+        // officialFinishTime: '12.30',
     }
     // const [data, setData] = new useState(initialData)
-    const [resultsData, setResultsData] = new useState(initialData)
+    // const [resultsData, setResultsData] = new useState(initialData)
     const [data, setData] = new useState()
-    // const [resultsData, setResultsData] = new useState()
+    const [resultsData, setResultsData] = new useState()
     const [lastMessageReceivedAt, setLastMessageReceivedAt] = new useState()
 
     const {lastJsonMessage, readyState} = useWebSocket(WS_URL, {
@@ -85,7 +87,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Scoreboard data={data} />}/>
 
-                {resultsData ? <Route path="/results" element={<Results data={resultsData} />}/>
+                {resultsData ? <Route path="/results" element={<Results data={resultsData} runningTime={data && !data.allAthletesHavePosition && !data.started && data.runningTime ? data.runningTime : null} />}/>
                     : <Route path="/results" element={<Scoreboard data={data} isResultsPage={true} />}/>
                 }
             </Routes>
