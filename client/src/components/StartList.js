@@ -1,8 +1,9 @@
 import {useEffect, useRef, useState} from "react";
 
-function StartList({athletes}) {
-    const tableBodyRef = useRef();
+function StartList({officialTimeIsSet, athletes}) {
+    const tableRef = useRef();
     const [windowSize, setWindowSize] = useState(window.innerWidth);
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -16,31 +17,27 @@ function StartList({athletes}) {
         }
     }, [])
 
-    //Make text scroll if it's too long
+    //Make table scroll if it's too high or if cell is too wide
     useEffect(() => {
-        let intervalIds = [];
+        let intervalIds = []
 
         document.fonts.ready.then(() => {
-            if (tableBodyRef.current) {
-                const tds = tableBodyRef.current.querySelectorAll('td')
-                tds.forEach(td => {
-                    const span = td.querySelector('span')
+            if (tableRef.current) {
+                const tableCells = tableRef.current.querySelectorAll('.tcell')
+                tableCells.forEach(tableCell => {
+                    const span = tableCell.querySelector('span')
 
                     if (span) {
-                        if(span.scrollWidth > td.offsetWidth - 50) {
-                            let diff = span.scrollWidth - td.offsetWidth + 25
+                        if(span.scrollWidth > tableCell.offsetWidth) {
+                            let diff = span.scrollWidth - tableCell.offsetWidth
                             diff = Math.ceil(diff / 10) * 10
 
                             let scrollPosition = 0
                             let scrollDirection = 1
                             const intervalId = setInterval(() => {
                                 scrollPosition += 10 * scrollDirection
-                                if (scrollPosition > diff) {
-                                    scrollDirection = -1
-                                }
-                                if (scrollPosition < 0) {
-                                    scrollDirection = 1
-                                }
+                                if (scrollPosition > diff) scrollDirection = -1
+                                else if (scrollPosition < 0) scrollDirection = 1
 
                                 span.style.transform = `translateX(-${scrollPosition}px)`;
                             }, 1000)
@@ -52,27 +49,20 @@ function StartList({athletes}) {
                     }
                 })
 
-                // const trs = tableBodyRef.current.querySelectorAll('tr')
-                // trs.forEach(tr => {
-                // })
+                if(tableRef.current.scrollHeight > tableRef.current.clientHeight) {
+                    const diff = tableRef.current.scrollHeight - tableRef.current.clientHeight
 
-
-                console.log(tableBodyRef.current.scrollHeight, tableBodyRef.current.clientHeight)
-
-
-                if(tableBodyRef.current.scrollHeight > tableBodyRef.current.clientHeight) {
                     let scrollPosition = 0
                     let scrollDirection = 1
                     const intervalId = setInterval(() => {
                         scrollPosition += 25 * scrollDirection
-                        if (scrollPosition > tableBodyRef.current.scrollHeight - tableBodyRef.current.clientHeight) {
-                            scrollDirection = -1
-                        }
-                        if (scrollPosition < 0) {
-                            scrollDirection = 1
-                        }
+                        if (scrollPosition > diff) scrollDirection = -1
+                        else if (scrollPosition < 0) scrollDirection = 1
 
-                        tableBodyRef.current.style.transform = `translateY(-${scrollPosition}px)`;
+                        const tbodyRows = tableRef.current.querySelectorAll('.tbody-trow');
+                        tbodyRows.forEach(row => {
+                            row.style.transform = `translateY(-${scrollPosition}px)`;
+                        })
                     }, 1000)
 
                     intervalIds.push(intervalId)
@@ -87,37 +77,28 @@ function StartList({athletes}) {
 
     return (
         <>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Baan</th>
-                        <th>Naam</th>
-                        <th>Start nr.</th>
-                        <th>Vereniging</th>
-                        {/*<th>Tijd</th>*/}
-                    </tr>
-                </thead>
-                <tbody ref={tableBodyRef}>
-                    {athletes.map((athlete, index) => (
-                        <tr key={index}>
-                            <td>{athlete.lane}</td>
-                            <td><span>{athlete.name}{athlete.name}</span></td>
-                            <td><span>{athlete.id}</span></td>
-                            <td><span>{athlete.affiliation}</span></td>
-                            {/*<td>{athlete.time}</td>*/}
-                        </tr>
-                    ))}
-                    {athletes.map((athlete, index) => (
-                        <tr key={index}>
-                            <td>{athlete.lane}</td>
-                            <td><span>{athlete.name}{athlete.name}</span></td>
-                            <td><span>{athlete.id}</span></td>
-                            <td><span>{athlete.affiliation}</span></td>
-                            {/*<td>{athlete.time}</td>*/}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="table" ref={tableRef}>
+                <div className="trow thead-trow">
+                    <div className="tcell lane">Baan</div>
+                    <div className="tcell name">Naam</div>
+                    <div className="tcell id">Start nr.</div>
+                    <div className="tcell affiliation">Vereniging</div>
+                    {officialTimeIsSet &&
+                        <div className="tcell time">Tijd</div>
+                    }
+                </div>
+                {athletes.map((athlete, index) => (
+                    <div className="trow tbody-trow" key={index}>
+                        <div className="tcell lane">{athlete.lane}</div>
+                        <div className="tcell name"><span>{athlete.name}</span></div>
+                        <div className="tcell id"><span>{athlete.id}</span></div>
+                        <div className="tcell affiliation"><span>{athlete.affiliation}</span></div>
+                        {officialTimeIsSet &&
+                            <div className="tcell time"><span>{athlete.time}</span></div>
+                        }
+                    </div>
+                ))}
+            </div>
         </>
     );
 }

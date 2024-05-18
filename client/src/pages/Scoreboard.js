@@ -7,8 +7,6 @@ function Scoreboard({data, isResultsPage = false}) {
     const showClock = (data == null || data.forceShowTimeOfDay || Object.keys(data.eventInfo).length <= 0 || (data.started && !data.allAthletesHavePosition))
 
     return (
-        //check should show title
-
         <div className="box-container">
             <Box className={showClock ? "" : "hidden"}>
                 <Clock className={showClock ? "shown" : ""}
@@ -20,11 +18,14 @@ function Scoreboard({data, isResultsPage = false}) {
             {!isResultsPage && data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 &&
                 <>
                     {!showClock &&
-                        <h1>{data.eventInfo.name}</h1>
+                        <h1>{data.eventInfo.title}</h1>
                     }
 
                     <Box className="unlimited-height">
-                        <StartList athletes={data.athletes} />
+                        <StartList
+                            officialTimeIsSet={data.athletes.some(athlete => athlete.time)}
+                            athletes={data.athletes}
+                        />
                     </Box>
                 </>
             }

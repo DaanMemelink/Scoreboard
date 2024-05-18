@@ -24,7 +24,6 @@ function Results({data}) {
 
     return (
         <>
-            {/* windmeting toevoegen ergens */}
             {data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 &&
                 <div className="result-page">
                     <div className="result-athlete">

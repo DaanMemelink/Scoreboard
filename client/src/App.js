@@ -31,11 +31,11 @@ function App() {
         started: true,
         runningTime: '13,40'
     }
-    const [data, setData] = new useState(initialData);
-    // const [resultsData, setResultsData] = new useState(initialData);
-    // const [data, setData] = new useState();
-    const [resultsData, setResultsData] = new useState();
-    const [lastMessageReceivedAt, setLastMessageReceivedAt] = new useState();
+    // const [data, setData] = new useState(initialData)
+    const [resultsData, setResultsData] = new useState(initialData)
+    const [data, setData] = new useState()
+    // const [resultsData, setResultsData] = new useState()
+    const [lastMessageReceivedAt, setLastMessageReceivedAt] = new useState()
 
     const {lastJsonMessage, readyState} = useWebSocket(WS_URL, {
         onOpen: () => {
@@ -45,7 +45,7 @@ function App() {
         filter: isNewDataEvent,
         retryOnError: true,
         shouldReconnect: () => true
-    });
+    })
 
     function checkShouldShowTimeOfDay() {
         if(lastMessageReceivedAt == null || new Date().getTime() - lastMessageReceivedAt.getTime() >= 1000 * 60 * 10) {//1000 * 60 * 10 for 10 minutes

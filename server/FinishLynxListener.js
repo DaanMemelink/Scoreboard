@@ -20,7 +20,7 @@ function resetScoreboard() {
         started: false,
         allAthletesHavePosition: false,
         forceShowTimeOfDay: false
-    };
+    }
 }
 
 udpResultsServer.on("listening", function () {
