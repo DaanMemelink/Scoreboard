@@ -97,6 +97,7 @@ h1 {
     margin: 0 20px 0 10px;
 }
 .box-container .bottom .running-time {
+    font-family: Roboto Mono;
     font-size: 100px;
     font-weight: 700;
     line-height: 90px;

@@ -3,25 +3,12 @@ const udpResultsServer = dgram.createSocket('udp4');
 const websocket = require('./websocket');
 const iconv = require('iconv-lite')
 
-const lynxPort = 43278;
-let tempResults = '';
-let finalResults = '';
-const initialRunningTime = '0.0';
-let scoreboardData = {};
-resetScoreboard()
-
-function resetScoreboard() {
-    scoreboardData = {
-        eventInfo: {},
-        athletes: [],
-        runningTime: initialRunningTime,
-        unOfficialFinishTime: null,
-        officialFinishTime: null,
-        started: false,
-        allAthletesHavePosition: false,
-        forceShowTimeOfDay: false
-    }
-}
+const lynxPort = 43278
+let tempResults = ''
+let finalResults = ''
+const initialRunningTime = '0.0'
+let scoreboardData = {}
+let oldAthletes = []
 
 udpResultsServer.on("listening", function () {
     const address = udpResultsServer.address();
@@ -29,12 +16,16 @@ udpResultsServer.on("listening", function () {
 });
 udpResultsServer.bind(lynxPort);
 
-function getTitle(fullTitle) {
-    console.log(fullTitle)
-
-    let title = fullTitle
-
-    return title
+function getTitle(title) {
+    const cleanedTitle = title.replace(/\s+/g, ' ').trim()
+    const pattern = /^(U\d{2})\s(M|V)-((\d+x)?\d{2,4}mH?)-(\d+)\s(\d{4}h)\s\(versie\s\d\)$/
+    const match = cleanedTitle.match(pattern)
+    if (match) {
+        const [, ageCategory, gender, distance, , series] = match
+        return `${ageCategory} ${gender === 'M' ? 'mannen' : 'vrouwen'} ${distance} - serie ${series}`
+    } else {
+        return title
+    }
 }
 
 udpResultsServer.on("message", function (msg, rinfo) {
@@ -45,11 +36,13 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
         const resultsDump = finalResults.split(';');
 
-        const oldAthletes = scoreboardData.athletes;
-        scoreboardData.athletes = []
-        scoreboardData.action = null
+        oldAthletes = scoreboardData.athletes ?? []
+        scoreboardData = {}
+
         for (let i = 0; i < resultsDump.length; i++) {
             resultsDump[i] = resultsDump[i].split(',');
+        }
+        for (let i = 0; i < resultsDump.length; i++) {
             const type = resultsDump[i][0];
 
             switch(type) {
@@ -58,7 +51,7 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "Time":
-                    scoreboardData.runningTime = resultsDump[i][1];
+                    scoreboardData.runningTime = resultsDump[i][1].trim()
                     scoreboardData.action = "time"
 
                     break;
@@ -73,20 +66,17 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "StartListHeader":
-                    resetScoreboard()
-                    getTitle(resultsDump[i][1])
+                    scoreboardData = {}
                     scoreboardData.eventInfo = {
-                        title: resultsDump[i][1],
+                        title: getTitle(resultsDump[i][1]),
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
                         amountAthletes: resultsDump[i][3]
                     };
 
                     break;
                 case "ResultsHeader":
-                    getTitle(resultsDump[i][1])
-
                     scoreboardData.eventInfo = {
-                        title: resultsDump[i][1],
+                        title: getTitle(resultsDump[i][1]),
                         wind: resultsDump[i][2] === "nwi" ? null : resultsDump[i][2],
                         amountAthletes: resultsDump[i][3]
                     };
@@ -94,7 +84,8 @@ udpResultsServer.on("message", function (msg, rinfo) {
 
                     break;
                 case "StartList":
-                    if(scoreboardData.athletes.length < scoreboardData.eventInfo.amountAthletes) {
+                    if(oldAthletes.length < scoreboardData.eventInfo.amountAthletes) {
+                        if(!scoreboardData.athletes) scoreboardData.athletes = []
                         scoreboardData.athletes.push({
                             place: resultsDump[i][1],
                             lane: resultsDump[i][2],
@@ -102,21 +93,39 @@ udpResultsServer.on("message", function (msg, rinfo) {
                             name: resultsDump[i][4],
                             affiliation: resultsDump[i][5],
                             time: resultsDump[i][6]
-                        });
+                        })
+
+                        scoreboardData.athletes.sort((a, b) => parseInt(a.lane) - parseInt(b.lane));
                     }
 
                     break;
                 case "Result":
-                    if(scoreboardData.athletes.length < scoreboardData.eventInfo.amountAthletes) {
+                    if(oldAthletes.length < scoreboardData.eventInfo.amountAthletes) {
+                        if(!scoreboardData.athletes) scoreboardData.athletes = []
+
+                        let time = resultsDump[i][6];
+                        if(typeof resultsDump[i[1]] === 'number') {
+                            if (i > 0 && Math.abs(resultsDump[i - 1][6] - time) <= 0.01 || i < resultsDump.length - 1 && Math.abs(time - resultsDump[i + 1][6]) <= 0.01) {
+                                time = parseFloat(resultsDump[i][6]).toFixed(3);
+                            } else {
+                                time = roundTime(time)
+                            }
+                        }
+
                         scoreboardData.athletes.push({
                             place: resultsDump[i][1],
                             lane: resultsDump[i][2],
                             id: resultsDump[i][3],
                             name: resultsDump[i][4],
                             affiliation: resultsDump[i][5],
-                            time: resultsDump[i][6]
-                        });
+                            time: time
+                        })
+                        scoreboardData.athletes.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
                     }
+
+                    break;
+                case "Wind":
+                    scoreboardData.eventInfo.wind = resultsDump[i][1];
 
                     break;
                 default:
@@ -145,15 +154,20 @@ udpResultsServer.on("message", function (msg, rinfo) {
                     break;
             }
 
-            if(scoreboardData.runningTime.replace(/ /g, "") !== initialRunningTime) {
-                scoreboardData.started = true;
-            }
+            // if(type === "time" && scoreboardData.runningTime && scoreboardData.runningTime.replace(/ /g, "") !== initialRunningTime) {
+            //     scoreboardData.started = true;
+            // }
         }
-        if(scoreboardData.athletes.length === 0) {
-            scoreboardData.athletes = oldAthletes
-        }
-        tempResults = '';// reset tempResults variable to prepare for next datagram
+        // if(scoreboardData.athletes.length === 0) {
+        //     scoreboardData.athletes = oldAthletes
+        // }
 
+        tempResults = '';// reset tempResults variable to prepare for next datagram
         websocket.broadcastMessage("newData", scoreboardData);
+        // resetScoreboard()
+    }
+
+    function roundTime(time) {
+        return (Math.ceil(parseFloat(time) * 100) / 100).toFixed(2);
     }
 });

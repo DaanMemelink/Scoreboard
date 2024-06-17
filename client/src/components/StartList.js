@@ -1,9 +1,8 @@
 import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 function StartList({officialTimeIsSet, athletes}) {
-    const tableRef = useRef();
-    const [windowSize, setWindowSize] = useState(window.innerWidth);
-
+    const tableRef = useRef()
+    const [windowSize, setWindowSize] = useState(window.innerWidth)
 
     useEffect(() => {
         const handleResize = () => {
