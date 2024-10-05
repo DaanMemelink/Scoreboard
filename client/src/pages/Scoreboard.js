@@ -8,7 +8,7 @@ function Scoreboard({data, isResultsPage = false}) {
 
     return (
         <div className="box-container">
-            <Box className={showClock ? "" : "hidden"}>
+            <Box className={!showClock && "hidden"}>
                 <Clock
                        runningTime={(isResultsPage && data && !data.started) ? null : (data && !data.forceShowTimeOfDay && Object.keys(data.eventInfo).length > 0 && data.runningTime)}
                        finishTime={data && (data.officialFinishTime ? data.officialFinishTime : data.unOfficialFinishTime)}

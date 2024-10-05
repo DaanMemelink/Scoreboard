@@ -12,39 +12,40 @@ function isNewDataEvent(message) {
 }
 
 function App() {
-    // const initialData = {
-    //     eventInfo: {
-    //         name: '100m U16 jongens',
-    //         date: '2021-01-01',
-    //         time: '11:00',
-    //         location: 'Location',
-    //         distance: '100m',
-    //         wind: '+0.7 m/s'
-    //     },
-    //     athletes: [
-    //         {place: 1, name: 'John Doe', id: 123, lane: 1, affiliation: 'ACME', time: '12.34'},
-    //         {place: 2, name: 'Jane Doe', id: 456, lane: 2, affiliation: 'ACME', time: '12.56'},
-    //         {place: 3, name: 'John Smith', id: 789, lane: 3, affiliation: 'Pallas', time: '12.78'},
-    //         {place: 4, name: 'Jane Smith', id: 101, lane: 4, affiliation: 'Pallas', time: '12.90'}
-    //     ],
-    //     forceShowTimeOfDay: false,
-    //     started: true,
-    //     runningTime: '13.40',
-    //     unOfficialFinishTime: '14.40',
-    //     // officialFinishTime: '12.30',
-    // }
     const initialData = {
-        eventInfo: {},
-        athletes: [],
-        runningTime: '0.0',
-        unOfficialFinishTime: null,
-        officialFinishTime: null,
-        started: false,
-        allAthletesHavePosition: false,
-        forceShowTimeOfDay: false
+        eventInfo: {
+            name: '100m U16 jongens',
+            date: '2021-01-01',
+            time: '11:00',
+            location: 'Location',
+            distance: '100m',
+            wind: '+0.7 m/s'
+        },
+        athletes: [
+            {place: 1, name: 'Daan Willem Memelink', id: 123, lane: 1, affiliation: 'ACME', time: '12.344'},
+            {place: 2, name: 'Daan Wil', id: 456, lane: 2, affiliation: 'ACME', time: '12.565'},
+            {place: 3, name: 'John Smith', id: 789, lane: 3, affiliation: 'Pallas', time: '12.782'},
+            {place: 4, name: 'Jane Smith', id: 101, lane: 4, affiliation: 'Pallas', time: '12.909'}
+        ],
+        forceShowTimeOfDay: false,
+        started: true,
+        runningTime: '13.40',
+        unOfficialFinishTime: '14.40',
+        // officialFinishTime: '12.30',
     }
+    // const initialData = {
+    //     eventInfo: {},
+    //     athletes: [],
+    //     runningTime: '0.0',
+    //     unOfficialFinishTime: null,
+    //     officialFinishTime: null,
+    //     started: false,
+    //     allAthletesHavePosition: false,
+    //     forceShowTimeOfDay: false
+    // }
     const [data, setData] = new useState(initialData)
-    const [resultsData, setResultsData] = new useState()
+    // const [resultsData, setResultsData] = new useState()
+    const [resultsData, setResultsData] = new useState(initialData)
     const [lastMessageReceivedAt, setLastMessageReceivedAt] = new useState()
 
     const {lastJsonMessage, readyState} = useWebSocket(WS_URL, {

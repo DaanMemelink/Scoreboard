@@ -9,7 +9,7 @@ function Clock({runningTime, finishTime}) {
                     <>
                         <div className={`time finish ${!finishTime && "hidden"}`}>
                             <AutoTextSize minFontSizePx={100} maxFontSizePx={200} mode="oneline">
-                                {finishTime && parseFloat(finishTime).toFixed(2)}
+                                {finishTime && Math.ceil(finishTime * 100) / 100}
                             </AutoTextSize>
                         </div>
 

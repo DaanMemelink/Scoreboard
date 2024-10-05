@@ -147,6 +147,10 @@ h1 {
     transition: all ease .5s;
 }
 
+:root {
+    --table-scroll-distance: 0px;
+    --table-cell-scroll-distance: 0px;
+}
 .table {
     width: calc(100% - 40px * 2);
     height: 100%;
@@ -154,6 +158,30 @@ h1 {
     position: relative;
     font-size: 40px;
 }
+.table-content {
+    display: flex;
+    flex-direction: column;
+    animation: scroll linear infinite alternate;
+    transform: translateY(0);
+}
+@keyframes scroll {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(calc(var(--table-scroll-distance) * -1));
+    }
+}
+
+@keyframes scroll-horizontal {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-100% + var(--table-cell-scroll-distance)));
+    }
+}
+
 .trow {
     height: 60px;
     padding: 10px 0;
@@ -178,6 +206,9 @@ h1 {
     white-space: nowrap;
     align-items: center;
     flex-shrink: 0;
+}
+.tcell .scroll {
+    animation: scroll-horizontal linear infinite alternate;
 }
 .tcell.lane {
     width: 80px;

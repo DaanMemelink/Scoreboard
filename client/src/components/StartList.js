@@ -2,6 +2,9 @@ import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 function StartList({officialTimeIsSet, athletes}) {
     const tableRef = useRef()
+    const tableHeaderRef = useRef()
+    const tableContentRef = useRef()
+    const tableCellRefs = useRef([])
     const [windowSize, setWindowSize] = useState(window.innerWidth)
 
     useEffect(() => {
@@ -17,67 +20,50 @@ function StartList({officialTimeIsSet, athletes}) {
     }, [])
 
     //Make table scroll if it's too high or if cell is too wide
-    useLayoutEffect(() => {
-        let intervalIds = []
+    useEffect(() => {
+        const parent = tableRef.current;
+        const header = tableHeaderRef.current
+        const children = tableContentRef.current
 
-        document.fonts.ready.then(() => {
-            if (tableRef.current) {
-                const tableCells = tableRef.current.querySelectorAll('.tcell')
-                tableCells.forEach(tableCell => {
-                    const span = tableCell.querySelector('span')
+        if (parent && header && children) {
+            const parentHeight = parent.clientHeight;
+            const headerHeight = header.clientHeight;
+            const childrenHeight = children.scrollHeight;
+            const scrollDistance = Math.max(0, childrenHeight - (parentHeight - headerHeight));
+            document.documentElement.style.setProperty('--table-scroll-distance', `${scrollDistance}px`);
 
-                    if (span) {
-                        if(span.scrollWidth > tableCell.offsetWidth) {
-                            let diff = span.scrollWidth - tableCell.offsetWidth
-                            diff = Math.ceil(diff / 10) * 10
+            const averageChildHeight = childrenHeight / athletes.length; // Average height per child
+            const scrollDuration = averageChildHeight * 0.05
+            children.style.animationDuration = `${scrollDuration}s`
 
-                            let scrollPosition = 0
-                            let scrollDirection = 1
-                            const intervalId = setInterval(() => {
-                                scrollPosition += 10 * scrollDirection
-                                if (scrollPosition > diff) scrollDirection = -1
-                                else if (scrollPosition < 0) scrollDirection = 1
+            if(tableCellRefs.current) {
+                tableCellRefs.current.forEach(tableCell => {
+                    const children = tableCell.children; // Get all direct children of tableCell
 
-                                span.style.transform = `translateX(-${scrollPosition}px)`;
-                            }, 1000)
+                    // Loop through each child to check its width
+                    Array.from(children).forEach(child => {
+                        // Check if the child's scrollWidth exceeds the tcell's clientWidth
+                        if (child.scrollWidth > tableCell.offsetWidth) {
+                            const scrollDistance = tableCell.offsetWidth
 
-                            intervalIds.push(intervalId);
+                            // Apply an inline style for `transform` only for this specific child
+                            child.style.setProperty('--table-cell-scroll-distance', `${scrollDistance}px`);
+                            child.style.animationDuration = `${child.scrollWidth / 25}s`; // Adjust speed as needed
+
+                            child.classList.add('scroll'); // Add scrolling class if child is wider
                         } else {
-                            span.style.transform = 'translateX(0)'
+                            child.classList.remove('scroll'); // Remove if not wider
                         }
-                    }
+                    });
                 })
-
-                if (tableRef.current.scrollHeight > tableRef.current.clientHeight) {
-                    const diff = tableRef.current.scrollHeight - tableRef.current.clientHeight
-
-                    let scrollPosition = 0
-                    let scrollDirection = 1
-                    const intervalId = setInterval(() => {
-                        scrollPosition += 25 * scrollDirection
-                        if (scrollPosition > diff) scrollDirection = -1
-                        else if (scrollPosition < 0) scrollDirection = 1
-
-                        const tbodyRows = tableRef.current.querySelectorAll('.tbody-trow');
-                        tbodyRows.forEach(row => {
-                            row.style.transform = `translateY(-${scrollPosition}px)`;
-                        })
-                    }, 1000)
-
-                    intervalIds.push(intervalId)
-                }
             }
-        })
-
-        return () => {
-            intervalIds.forEach(id => clearInterval(id));
         }
     }, [athletes, windowSize, tableRef])
 
     return (
         <>
             <div className="table" ref={tableRef}>
-                <div className="trow thead-trow">
+                <div className="trow thead-trow" ref={tableHeaderRef}>
                     <div className="tcell lane">Baan</div>
                     <div className="tcell name">Naam</div>
                     <div className="tcell id">Start nr.</div>
@@ -86,17 +72,20 @@ function StartList({officialTimeIsSet, athletes}) {
                         <div className="tcell time">Tijd</div>
                     }
                 </div>
-                {athletes.map((athlete, index) => (
-                    <div className="trow tbody-trow" key={index}>
-                        <div className="tcell lane">{athlete.lane}</div>
-                        <div className="tcell name"><span>{athlete.name}</span></div>
-                        <div className="tcell id"><span>{athlete.id}</span></div>
-                        <div className="tcell affiliation"><span>{athlete.affiliation}</span></div>
-                        {officialTimeIsSet &&
-                            <div className="tcell time"><span>{athlete.time}</span></div>
-                        }
-                    </div>
-                ))}
+
+                <div className="table-content" ref={tableContentRef}>
+                    {athletes.map((athlete, index) => (
+                        <div className="trow tbody-trow" key={index}>
+                            <div className="tcell lane">{athlete.lane}</div>
+                            <div className="tcell name" ref={element => tableCellRefs.current[index] = element}><span>{athlete.name}</span></div>
+                            <div className="tcell id"><span>{athlete.id}</span></div>
+                            <div className="tcell affiliation"><span>{athlete.affiliation}</span></div>
+                            {officialTimeIsSet &&
+                                <div className="tcell time"><span>{Math.ceil(athlete.time * 100) / 100}</span></div>
+                            }
+                        </div>
+                    ))}
+                </div>
             </div>
         </>
     );
